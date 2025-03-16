@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "https://hr-dep-1.onrender.com/api";
 
 // Create message container for smooth UI messages
 const messageContainer = document.createElement("div");
@@ -122,7 +122,7 @@ async function fetchUser() {
 async function requestSetPassword() {
     const email = document.getElementById("loginEmail").value;
     
-    const response = await fetch("http://localhost:3000/api/request-set-password", {
+    const response = await fetch("https://hr-dep-1.onrender.com/api/request-set-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
