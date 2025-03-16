@@ -37,7 +37,8 @@ router.post('/request-set-password', async (req, res) => {
             auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASS }
         });
 
-        const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+        const resetLink = `${BASE_URL}/reset-password?token=${resetToken}`;
         await transporter.sendMail({
             from: process.env.EMAIL,
             to: user.email,
@@ -126,7 +127,8 @@ router.get(
     passport.authenticate("google", { failureRedirect: "/login" }),
     async (req, res) => {
         const token = jwt.sign({ userId: req.user._id }, SECRET_KEY, { expiresIn: "1h" });
-        res.redirect(`http://127.0.0.1:5500/frontend/pages/dashboard.html?token=${token}`);
+        const FRONTEND_URL = process.env.FRONTEND_URL || "http://127.0.0.1:5500/frontend/pages";
+        res.redirect(`${FRONTEND_URL}/dashboard.html?token=${token}`);
     }
 );
 
