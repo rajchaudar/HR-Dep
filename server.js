@@ -4,8 +4,23 @@ const cors = require('cors');
 require('dotenv').config({ path: "Config.env" });
 const authRoutes = require('./routes/authRoutes');
 const path = require('path');
+const passport = require('passport');
+const session = require('express-session');
 
 const app = express();
+
+// ✅ Add `express-session` middleware before initializing `passport`
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "your_secret_key",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: false } // Set `true` if using HTTPS
+    })
+);
+// ✅ Initialize Passport and use session
+app.use(passport.initialize());
+app.use(passport.session());
 
 // 📌 Serve Static Frontend Files
 app.use(express.static(path.join(__dirname, '../frontend')));
