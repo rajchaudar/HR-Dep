@@ -10,6 +10,10 @@ const app = express();
 // 📌 Serve Static Frontend Files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+app.get("/", (req, res) => {
+    res.send("Backend is running successfully! 🚀");
+  });
+  
 app.get("/api", (req, res) => {
     res.json({ message: "API is working!" });
 });
