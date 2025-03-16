@@ -40,7 +40,7 @@ app.get('/reset-password', (req, res) => {
 });
 
 app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages/login.html'));
+    res.sendFile(path.join(__dirname, 'HR-Dep/pages/login.html'));
 });
 
 // 📌 Middleware
