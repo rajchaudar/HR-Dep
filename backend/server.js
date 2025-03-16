@@ -10,6 +10,9 @@ const app = express();
 // 📌 Serve Static Frontend Files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+app.get("/api", (req, res) => {
+    res.json({ message: "API is working!" });
+});
 app.get('/reset-password', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/reset-password.html'));
 });
