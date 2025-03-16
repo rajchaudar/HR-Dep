@@ -32,8 +32,11 @@ app.get("/", (req, res) => {
 app.get("/api", (req, res) => {
     res.json({ message: "API is working!" });
 });
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://rajchaudar.github.io/HR-Dep";
+
 app.get('/reset-password', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/pages/reset-password.html'));
+    const token = req.query.token; // Get token from query parameters
+    res.redirect(`${FRONTEND_URL}/pages/reset-password.html?token=${token}`);
 });
 
 app.get('/login.html', (req, res) => {
