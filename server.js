@@ -36,7 +36,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "https://rajchaudar.github.io/H
 
 app.get('/reset-password', (req, res) => {
     const token = req.query.token; // Get token from query parameters
-    res.redirect(`${FRONTEND_URL}/pages/reset-password.html?token=${token}`);
+    res.redirect(`${FRONTEND_URL}/reset-password.html?token=${token}`);
 });
 
 app.get('/login.html', (req, res) => {
