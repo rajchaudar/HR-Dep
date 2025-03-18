@@ -1,8 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config({ path: "config.env" });
-
+require('dotenv').config({path :"config.env"});
 const authRoutes = require('./routes/authRoutes');
 const productsRoutes = require('./routes/productsRoutes');
 const Contact = require("./models/Contact");
@@ -19,17 +18,25 @@ app.use(express.json());
 app.use(cors());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log("✅ Connected to MongoDB Atlas"))
-  .catch(err => console.error("❌ MongoDB Connection Error:", err));
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ Connected to MongoDB Atlas"))
+    .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes);
 app.use("/api/products", productsRoutes);
 
-// ✅ Contact Form API Route (Fixed)
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    });
+}
+
+
+
+//Contact form
 app.post("/api/contact", async (req, res) => {
     try {
         const { name, email, message } = req.body;
@@ -47,14 +54,6 @@ app.post("/api/contact", async (req, res) => {
         res.status(500).json({ success: false, message: "Server error." });
     }
 });
-
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend')));
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../frontend/index.html'));
-    });
-}
 
 // Start Server
 const PORT = process.env.PORT || 3000;
