@@ -37,14 +37,16 @@ if (process.env.NODE_ENV === 'production') {
 
 
 //Contact form
-app.post('/api/contact', async (req, res) => {
+app.post("/api/contact", async (req, res) => {
     try {
         const { name, email, message } = req.body;
-        const newMessage = new Contact({ name, email, message });
-        await newMessage.save();
-        res.json({ success: true, message: "Message stored successfully!" });
+        if (!name || !email || !message) {
+            return res.status(400).json({ success: false, message: "All fields are required." });
+        }
+        res.json({ success: true, message: "Message received successfully!" });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+        console.error("Error handling contact form:", error);
+        res.status(500).json({ success: false, message: "Server error." });
     }
 });
 
