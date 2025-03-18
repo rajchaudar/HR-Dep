@@ -1,59 +1,53 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config({ path: "Config.env" });
+require('dotenv').config({path :"config.env"});
 const authRoutes = require('./routes/authRoutes');
+const productsRoutes = require('./routes/productsRoutes');
+const Contact = require("./models/Contact");
 const path = require('path');
-const passport = require('passport');
-const session = require('express-session');
 
 const app = express();
 
-// ✅ Add `express-session` middleware before initializing `passport`
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET || "your_secret_key",
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: false } // Set `true` if using HTTPS
-    })
-);
-// ✅ Initialize Passport and use session
-app.use(passport.initialize());
-app.use(passport.session());
+// Use correct BASE URL dynamically
+const BASE_URL = process.env.NODE_ENV === 'production' ? process.env.PROD_BASE_URL : process.env.LOCAL_BASE_URL;
+console.log(`🔗 Running on: ${BASE_URL}`);
 
-// 📌 Serve Static Frontend Files
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-app.get("/", (req, res) => {
-    res.send("Backend is running successfully! 🚀");
-  });
-  
-app.get("/api", (req, res) => {
-    res.json({ message: "API is working!" });
-});
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://rajchaudar.github.io/HR-Dep";
-
-app.get('/reset-password', (req, res) => {
-    const token = req.query.token; // Get token from query parameters
-    res.redirect(`${FRONTEND_URL}/reset-password.html?token=${token}`);
-});
-
-app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'HR-Dep/pages/login.html'));
-});
-
-// 📌 Middleware
+// Middleware
 app.use(express.json());
 app.use(cors());
 
-// 📌 Connect to MongoDB
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ Connected to MongoDB Atlas"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
-// 📌 Routes
+// Routes
 app.use('/api', authRoutes);
+app.use("/api/products", productsRoutes);
 
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    });
+}
+
+
+
+//Contact form
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, message } = req.body;
+        const newMessage = new Contact({ name, email, message });
+        await newMessage.save();
+        res.json({ success: true, message: "Message stored successfully!" });
+    } catch (error) {
+        res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+});
+
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

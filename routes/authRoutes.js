@@ -11,7 +11,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const router = express.Router();
-const SECRET_KEY = process.env.JWT_SECRET;
+const SECRET_KEY = process.env.JWT_SECRET;  
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // 📌 **Generate Password Reset Token**
@@ -114,7 +114,7 @@ router.post("/auth/google/token", async (req, res) => {
         // ✅ Generate JWT Token
         const jwtToken = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
 
-        res.json({ success: true, message: "Google login successful", token: jwtToken });
+        res.json({ success: true, message: "Google login successfull", token: jwtToken });
     } catch (error) {
         res.status(500).json({ success: false, message: "Google authentication failed" });
     }
@@ -176,7 +176,7 @@ router.post("/login", async (req, res) => {
         // ✅ Generate JWT Token
         const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
 
-        res.status(200).json({ success: true, message: "Login successful", token });
+        res.status(200).json({ success: true, message: "Login successfull", token });
 
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error" });
@@ -194,7 +194,7 @@ function authenticateToken(req, res, next) {
         if (err) return res.status(403).json({ success: false, message: "Invalid token" });
 
         req.user = await User.findById(decoded.userId).select("-password");
-        if (!req.user) return res.status(404).json({ success: false, message: "User not found in database" });
+        if (!req.user) return res.status(404).json({ success: false, message: "User not found" });
 
         next();
     });
@@ -213,23 +213,44 @@ router.post('/reset-password', async (req, res) => {
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
-        res.json({ success: true, message: "Password reset successful" });
+        res.json({ success: true, message: "Password reset successfull" });
     } catch (error) {
         console.error("❌ Error resetting password:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
 
-// 📌 **Protected Route (Dashboard)**
-router.get("/dashboard", authenticateToken, async (req, res) => {
-    res.json({ success: true, user: req.user });
+// 📌 **Public Dashboard Route (No Authentication Required)**
+router.get("/dashboard", async (req, res) => {
+    try {
+        const users = await User.find().select("-password");
+        const products = await Product.find(); // Fetch all products
+
+        res.json({ success: true, users, products });
+    } catch (error) {
+        console.error("❌ Error fetching dashboard data:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+router.get("/user", async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1]; 
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const user = await User.findById(decoded.userId).select("-password");
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Invalid token" });
+    }
 });
 
 // 📌 **Logout Route**
-router.get("/logout", (req, res) => {
-    req.logout(() => {
-        res.json({ success: true, message: "Logged out successfully" });
-    });
+router.post("/logout", (req, res) => {
+    res.json({ success: true, message: "Logout successful" });
 });
 
 module.exports = router;
