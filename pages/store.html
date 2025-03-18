@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store - MedSupply</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-blue-600 text-white py-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center px-6">
+            <a href="dashboard.html" class="text-xl font-bold">MedSupply</a>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="dashboard.html" class="hover:text-gray-300">Home</a></li>
+                    <li><a href="products.html" class="hover:text-gray-300">Products</a></li>
+                    <li><a href="store.html" class="hover:text-gray-300">Store</a></li>
+                    <li><a href="contact.html" class="hover:text-gray-300">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="container mx-auto py-10">
+        <h2 class="text-2xl font-bold text-center mb-6">Store Information</h2>
+        <p class="text-center text-gray-600">Find our store locations and stock availability here.</p>
+        <div id="storeDetails" class="mt-6 text-center">
+            <!-- Store details will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white text-center py-4 mt-10">
+        <p>© 2025 MedSupply. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/store.js"></script>
+</body>
+</html>
