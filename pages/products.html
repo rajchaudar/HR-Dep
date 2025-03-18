@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - MedSupply</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 50;
+            height: 50px; /* Increased height for better alignment */
+            display: flex;
+            align-items: center; /* Centers content vertically */
+        }
+        
+        body {
+            background-color: #f3f4f6;
+            padding-top: 80px; /* Adjust based on header height */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+        
+        section {
+            padding: 60px 20px; /* Adjust padding to prevent content overlap */
+        }
+
+        .logout-link {
+            color: black;
+            text-decoration: none;
+            transition: color 0.3s ease-in-out;
+        }
+        
+        .logout-link:hover {
+            color: gray;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-blue-600 text-white py-4 shadow-md fixed w-full top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center px-6">
+            <a  href="#home" class="text-xl font-bold">MedSupply</a>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="dashboard.html" class="hover:text-gray-300">Home</a></li>
+                    <li><a href="products.html" class="hover:text-gray-300">Products</a></li>
+                    <li><a href="#store" class="hover:text-gray-300">Store</a></li>
+                    <li><a href="#contact" class="hover:text-gray-300">Contact</a></li>
+                </ul>
+            </nav>
+            <div>
+                <a id="loginRegisterLink" href="login.html">Sign In / Register</a>
+                <span id="userName"></span>
+                <a id="logoutLink" href="#" class="hidden logout-link" onclick="logout()">| Logout</a>
+                
+            </div>
+        </div>
+    </header>
+
+  <!-- Products Section -->
+  <section id="products" class="container mx-auto py-10">
+    <h2 class="text-2xl font-bold text-center mb-6">Available Products</h2>
+    <div id="marketedProducts" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 px-6">
+        <!-- This is where products will be dynamically inserted -->
+    </div>
+</section>
+
+<!-- Product Modal -->
+<div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+        <h2 class="text-xl font-bold" id="modalProductName"></h2>
+        <p class="text-gray-600" id="modalProductDesc"></p>
+        <button onclick="closeModal()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Close</button>
+    </div>
+</div>
+
+    <footer class="bg-gray-800 text-white text-center py-4 mt-10">
+        <p>© 2025 MedSupply. All rights reserved.</p>
+    </footer>
+
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

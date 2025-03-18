@@ -1,4 +1,8 @@
-const API_BASE_URL = "https://hr-dep-1.onrender.com/api";
+const API_BASE_URL = window.location.hostname.includes("localhost")
+    ? "http://localhost:3000/api"
+    : "https://hr-dep-1.onrender.com/api";
+
+    console.log(`Using API Base URL: ${API_BASE_URL}`);
 
 // Create message container for smooth UI messages
 const messageContainer = document.createElement("div");
@@ -52,7 +56,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (event
 });
 
 // 📌 **User Login**
-document.getElementById('loginForm')?.addEventListener('submit', async (event) => {
+async function loginUser(event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
@@ -60,16 +64,17 @@ document.getElementById('loginForm')?.addEventListener('submit', async (event) =
     const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
     });
 
     const data = await response.json();
-    showMessage(data.message, data.success ? "#4CAF50" : "#f44336");
+    alert(data.message);
+    
     if (data.success) {
         localStorage.setItem('token', data.token);
-        setTimeout(() => window.location.href = "dashboard.html", 1500);
+        window.location.href = "dashboard.html";
     }
-});
+}
 
 // 📌 **Google Sign-In**
 async function handleGoogleLogin(response) {
@@ -119,23 +124,33 @@ async function fetchUser() {
     }
 }
 
+// 📌 **Request Set Password**
 async function requestSetPassword() {
-    const email = document.getElementById("loginEmail").value;
+    const email = document.getElementById("loginEmail").value.trim();
     
-    const response = await fetch("https://hr-dep-1.onrender.com/api/request-set-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-    });
+    if (!email) {
+        showMessage("Please enter your email address.", "#f44336");
+        return;
+    }
 
-    const data = await response.json();
-    showMessage(data.message, data.success ? "success" : "error");
+    try {
+        const response = await fetch(`${API_BASE_URL}/request-set-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+        showMessage(data.message, data.success ? "#4CAF50" : "#f44336");
+    } catch (error) {
+        showMessage("Something went wrong. Please try again.", "#f44336");
+    }
 }
 
 // 📌 **Logout Function**
 function logout() {
-    localStorage.removeItem('token');
-    window.location.href = "login.html";
+    localStorage.removeItem("token");
+    window.location.reload();
 }
 
 // ✅ Fetch user details when on Dashboard page

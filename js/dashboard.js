@@ -1,0 +1,191 @@
+// API Base URL (Handles both local and hosted environments)
+const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:3000/api"
+    : "https://hr-dep-1.onrender.com/api";
+
+// Function to fetch user details and update the UI
+async function fetchUserDetails() {
+    const token = localStorage.getItem("token");
+    
+    // Ensure elements exist before manipulating them
+    const loginRegisterLink = document.getElementById("loginRegisterLink");
+    const logoutLink = document.getElementById("logoutLink");
+    const userName = document.getElementById("userName");
+
+    if (!loginRegisterLink || !logoutLink || !userName) {
+        console.error("One or more authentication elements are missing in the HTML.");
+        return;
+    }
+
+    if (!token) {
+        loginRegisterLink.classList.remove("hidden");
+        logoutLink.classList.add("hidden");
+        userName.textContent = "Guest";
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/user`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            throw new Error("Invalid response");
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            loginRegisterLink.classList.add("hidden");
+            logoutLink.classList.remove("hidden");
+            userName.textContent = data.user.name;
+        } else {
+            loginRegisterLink.classList.remove("hidden");
+            logoutLink.classList.add("hidden");
+        }
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        loginRegisterLink.classList.remove("hidden");
+        logoutLink.classList.add("hidden");
+    }
+}
+
+async function fetchMarketedProducts() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/products/marketed`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const container = document.getElementById("marketedProducts");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        // Detect if the current page is "dashboard.html"
+        const isDashboard = window.location.pathname.includes("dashboard");
+
+        if (data.success && data.products.length > 0) {
+            data.products.forEach((product, index) => {
+                if (isDashboard && index >= 6) return; // Show only 6 on dashboard
+
+                const productCard = document.createElement("div");
+                productCard.className = "relative group cursor-pointer overflow-hidden rounded-lg shadow-lg bg-white";
+
+                productCard.innerHTML = `
+                    <img src="${product.image}" class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110" alt="${product.name}">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
+                        <h3 class="text-xl text-yellow-400 font-bold text-center">${product.name}</h3>
+                        <p class="text-white text-sm text-center">${product.shortDesc}</p>
+                        <button onclick="showModal('${encodeURIComponent(product.name)}', '${encodeURIComponent(product.description)}', '${product.image}')" 
+                            class="mt-3 bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500">
+                            See More
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(productCard);
+            });
+        } else {
+            container.innerHTML = `<p class="text-center text-gray-500">No products available.</p>`;
+        }
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        document.getElementById("marketedProducts").innerHTML = `<p class="text-center text-red-500">Failed to load products. Please try again later.</p>`;
+    }
+}
+
+function showModal(name, desc, image) {
+    document.getElementById("modalProductName").textContent = decodeURIComponent(name);
+    document.getElementById("modalProductDesc").textContent = decodeURIComponent(desc);
+    document.getElementById("modalProductImage").src = image;
+    document.getElementById("productModal").classList.remove("hidden");
+}
+
+function closeModal() {
+    document.getElementById("productModal").classList.add("hidden");
+}
+
+// ✅ Fetch Store Products (Products available for purchase)
+async function fetchStoreProducts() {
+    const productsContainer = document.getElementById("storeProducts");
+    if (!productsContainer) {
+        console.error("storeProducts container is missing in the HTML.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/products/store`);
+        const data = await response.json();
+
+        productsContainer.innerHTML = ""; // Clear previous content
+
+        if (data.success && data.products.length > 0) {
+            data.products.forEach(product => {
+                const productItem = `
+                    <div class="product bg-white shadow-md p-4 rounded">
+                        <h3 class="text-lg font-bold">${product.name}</h3>
+                        <p>${product.description}</p>
+                        <p class="text-gray-700 font-semibold">Price: ₹${product.price}</p>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded mt-2" 
+                            onclick="addToCart('${product.name}', ${product.price})">
+                            Add to Cart
+                        </button>
+                    </div>
+                `;
+                productsContainer.innerHTML += productItem;
+            });
+        } else {
+            productsContainer.innerHTML = "<p class='text-gray-600'>No store products available.</p>";
+        }
+    } catch (error) {
+        console.error("Error fetching store products:", error);
+        productsContainer.innerHTML = "<p class='text-red-500'>Failed to load store products.</p>";
+    }
+}
+
+// Function to add a product to the cart
+function addToCart(productName, price) {
+    alert(`Added ${productName} to cart for ₹${price}`);
+}
+
+// Logout function
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
+// ✅ Fetch data when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+    fetchUserDetails();
+    fetchMarketedProducts();
+    fetchStoreProducts();
+    
+});
+
+document.getElementById("contactForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        message: document.getElementById("message").value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/contact`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            document.getElementById("successMessage").classList.remove("hidden");
+            document.getElementById("contactForm").reset();
+        }
+    } catch (error) {
+        console.error("Error submitting form:", error);
+    }
+});
