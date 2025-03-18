@@ -3,53 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedSupply - Online Store</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Home</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        h2 {
+            color: #333;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-
-    <!-- Header -->
-    <header class="bg-blue-600 text-white py-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center px-6">
-            <h1 class="text-xl font-bold">MedSupply</h1>
-            <nav>
-                <ul class="flex space-x-6">
-                    <li><a href="dashboard.html" class="hover:text-gray-300">Home</a></li>
-                    <li><a href="products.html" class="hover:text-gray-300">Products</a></li>
-                    <li><a href="store.html" class="hover:text-gray-300">Store</a></li>
-                    <li><a href="contact.html" class="hover:text-gray-300">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="text-sm flex items-center space-x-4">
-                <a href="/frontend/pages/login.html" class="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200">Login</a>
-                <a href="/frontend/pages/login.html" class="bg-yellow-400 text-blue-600 px-4 py-2 rounded-md hover:bg-yellow-500">Register</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="bg-blue-500 text-white text-center py-20">
-        <h1 class="text-4xl font-bold">Welcome to MedSupply</h1>
-        <p class="text-lg mt-2">Your one-stop online store for medical supplies</p>
-        <a href="store.html" class="mt-4 inline-block bg-yellow-400 text-blue-600 px-6 py-3 rounded-md text-lg hover:bg-yellow-500">
-            Shop Now
-        </a>
-    </section>
-
-    <!-- Available Products -->
-    <section class="container mx-auto py-10">
-        <h2 class="text-2xl font-bold text-center mb-6">Available Products</h2>
-        <div id="marketedProducts" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6">
-            <!-- Products will be dynamically inserted here -->
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white text-center py-6 mt-10">
-        <p class="text-lg">© 2025 MedSupply. All rights reserved.</p>
-        <p>Contact: <a href="mailto:support@medsupply.com" class="underline">support@medsupply.com</a> | Phone: +91 98765 43210</p>
-    </footer>
-
-    <script src="/frontend/js/dashboard.js"></script>
+<body>
+    <div class="container">
+        <h2>Welcome to Our App</h2>
+        <a href="pages/dashboard.html"><button>Get Started</button></a>
+    </div>
 </body>
 </html>
