@@ -55,26 +55,48 @@ document.getElementById('registerForm')?.addEventListener('submit', async (event
     }
 });
 
-// 📌 **User Login**
-async function loginUser(event) {
-    event.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-    const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-    });
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    const loginMessage = document.getElementById("loginMessage");
 
-    const data = await response.json();
-    alert(data.message);
-    
-    if (data.success) {
-        localStorage.setItem('token', data.token);
-        window.location.href = "dashboard.html";
+    // Clear previous messages
+    loginMessage.textContent = "";
+
+    // Validate input fields
+    if (!email || !password) {
+        loginMessage.textContent = "Please enter both email and password.";
+        loginMessage.style.color = "red";
+        return;
     }
-}
+
+    try {
+        // Send POST request to backend API
+        const response = await fetch(`${API_BASE_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // If login is successful, store the token and redirect
+            localStorage.setItem("token", data.token);
+            window.location.href = "dashboard.html"; // Redirect to dashboard
+        } else {
+            // Directly display backend error message
+            loginMessage.textContent = data.message || "Login failed!";
+            loginMessage.style.color = "red";
+        }
+    } catch (error) {
+        console.error("Login Error:", error);
+        loginMessage.textContent = "Something went wrong. Please try again later.";
+        loginMessage.style.color = "red";
+    }
+});
 
 // 📌 **Google Sign-In**
 async function handleGoogleLogin(response) {
