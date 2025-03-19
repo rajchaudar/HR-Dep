@@ -55,46 +55,33 @@ document.getElementById('registerForm')?.addEventListener('submit', async (event
     }
 });
 
-document.getElementById("loginForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+//Email Login
+document.getElementById('loginForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-    const loginMessage = document.getElementById("loginMessage");
-
-    // Clear previous messages
-    loginMessage.textContent = "";
-
-    // Validate input fields
-    if (!email || !password) {
-        loginMessage.textContent = "Please enter both email and password.";
-        loginMessage.style.color = "red";
-        return;
-    }
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
     try {
-        // Send POST request to backend API
         const response = await fetch(`${API_BASE_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
         const data = await response.json();
-
-        if (response.ok) {
-            // If login is successful, store the token and redirect
-            localStorage.setItem("token", data.token);
-            window.location.href = "dashboard.html"; // Redirect to dashboard
-        } else {
-            // Directly display backend error message
-            loginMessage.textContent = data.message || "Login failed!";
-            loginMessage.style.color = "red";
+        
+        // Show the message and display color based on success
+        showMessage(data.message, data.success ? "#4CAF50" : "#f44336");
+        
+        // If login is successful, store token and redirect
+        if (data.success) {
+            localStorage.setItem('token', data.token);
+            setTimeout(() => window.location.href = "dashboard.html", 1500);
         }
     } catch (error) {
-        console.error("Login Error:", error);
-        loginMessage.textContent = "Something went wrong. Please try again later.";
-        loginMessage.style.color = "red";
+        console.error("Login error:", error);
+        showMessage("An error occurred. Please try again later.", "#f44336");
     }
 });
 
