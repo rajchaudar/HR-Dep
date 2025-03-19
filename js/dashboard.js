@@ -76,15 +76,19 @@ async function fetchMarketedProducts() {
                 productCard.innerHTML = `
                     <img src="${product.image}" class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110" alt="${product.name}">
                     <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
-                        <h3 class="text-xl text-yellow-400 font-bold text-center">${product.name}</h3>
-                        <p class="text-white text-sm text-center">${product.shortDesc}</p>
-                        <button onclick="showModal('${encodeURIComponent(product.name)}', '${encodeURIComponent(product.description)}', '${product.image}')" 
-                            class="mt-3 bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500">
-                            See More
-                        </button>
-                    </div>
-                `;
-
+                        <h3 class="text-xl text-white font-bold text-center">${product.name}</h3>
+                        <p class="text-white text-sm text-center">
+                        ${product.description ? product.description : (product.description ?  "..." : "Information not available")}</p>
+                        <button onclick="showModal(
+                        '${encodeURIComponent(product.name)}', 
+                        '${encodeURIComponent(product.description)}', 
+                        '${product.image}', 
+                        '${encodeURIComponent(product.uses || "Not Available")}', 
+                        '${encodeURIComponent(product.content || "Not Available")}', 
+                        '${encodeURIComponent(product.manufacturer || "Not Available")}', 
+                        '${product.price}')"class="mt-3 bg-white text-black px-4 py-2 rounded hover:bg-blue-300">
+                        See More</button>
+                        </div>`;
                 container.appendChild(productCard);
             });
         } else {
@@ -96,13 +100,38 @@ async function fetchMarketedProducts() {
     }
 }
 
-function showModal(name, desc, image) {
-    document.getElementById("modalProductName").textContent = decodeURIComponent(name);
-    document.getElementById("modalProductDesc").textContent = decodeURIComponent(desc);
-    document.getElementById("modalProductImage").src = image;
-    document.getElementById("productModal").classList.remove("hidden");
+// Function to Show Modal with Product Details
+function showModal(name, description, image, uses, content, manufacturer, price) {
+    // Get the modal and content elements
+    const modal = document.getElementById("productModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalImage = document.getElementById("modalImage");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalUses = document.getElementById("modalUses");
+    const modalContent = document.getElementById("modalContent");
+    const modalManufacturer = document.getElementById("modalManufacturer");
+    const modalPrice = document.getElementById("modalPrice");
+
+    // Update the modal content
+    modalTitle.textContent = decodeURIComponent(name);
+    modalImage.src = image;
+    modalImage.alt = decodeURIComponent(name);
+    modalDescription.textContent = decodeURIComponent(description) || "No description available.";
+    modalUses.textContent = `Uses: ${decodeURIComponent(uses) || "..."}`;
+    modalContent.textContent = `Content: ${decodeURIComponent(content) || "Not available"}`;
+    modalManufacturer.textContent = `Manufacturer: ${decodeURIComponent(manufacturer) || "Unknown"}`;
+    modalPrice.textContent = `Price: ₹${price}`;
+
+    // Show the modal
+    modal.classList.remove("hidden");
 }
 
+// Function to close the modal
+function closeModal() {
+    document.getElementById("productModal").classList.add("hidden");
+}
+
+// Function to close the modal
 function closeModal() {
     document.getElementById("productModal").classList.add("hidden");
 }
