@@ -13,6 +13,19 @@ const app = express();
 const BASE_URL = process.env.NODE_ENV === 'production' ? process.env.PROD_BASE_URL : process.env.LOCAL_BASE_URL;
 console.log(`🔗 Running on: ${BASE_URL}`);
 
+
+app.get('/reset-password', (req, res) => {
+    const token = req.query.token; // Get token from query parameters
+    res.redirect(`${FRONTEND_URL}/pages/reset-password.html?token=${token}`);
+    res.redirect(`${FRONTEND_URL}/reset-password.html?token=${token}`);
+});
+
+
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages/login.html'));
+    res.sendFile(path.join(__dirname, 'HR-Dep/pages/login.html'));
+});
+
 // Middleware
 app.use(express.json());
 app.use(cors());
