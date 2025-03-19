@@ -9,13 +9,14 @@ const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const cors = require("cors");
 
 const router = express.Router();
 const SECRET_KEY = process.env.JWT_SECRET;  
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // 📌 **Generate Password Reset Token**
-router.post('/request-set-password', async (req, res) => {
+router.post("/request-set-password", cors(), async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
@@ -24,21 +25,19 @@ router.post('/request-set-password', async (req, res) => {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
-        // Generate reset token (valid for 15 minutes)
-        const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
-
+        const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
         user.resetToken = resetToken;
-        user.tokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes from now
+        user.tokenExpiry = Date.now() + 15 * 60 * 1000;
         await user.save();
 
-        // Send email with reset link
         const transporter = nodemailer.createTransport({
-            service: 'Gmail',
+            service: "Gmail",
             auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASS }
         });
 
         const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
         const resetLink = `${BASE_URL}/reset-password?token=${resetToken}`;
+        
         await transporter.sendMail({
             from: process.env.EMAIL,
             to: user.email,
@@ -203,17 +202,26 @@ function authenticateToken(req, res, next) {
 router.post('/reset-password', async (req, res) => {
     try {
         const { token, newPassword } = req.body;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId);
+        if (!token || !newPassword) {
+            return res.status(400).json({ success: false, message: "Token and new password are required." });
+        }
 
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(400).json({ success: false, message: "Invalid or expired token." });
+        }
+
+        const user = await User.findById(decoded.userId);
         if (!user) {
-            return res.status(400).json({ success: false, message: "Invalid token or user not found" });
+            return res.status(400).json({ success: false, message: "User not found." });
         }
 
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
-        res.json({ success: true, message: "Password reset successfull" });
+        res.json({ success: true, message: "Password reset successful" });
     } catch (error) {
         console.error("❌ Error resetting password:", error);
         res.status(500).json({ success: false, message: "Internal server error" });

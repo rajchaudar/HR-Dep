@@ -15,9 +15,19 @@ console.log(`🔗 Running on: ${BASE_URL}`);
 
 
 app.get('/reset-password', (req, res) => {
-    const token = req.query.token; // Get token from query parameters
-    res.redirect(`${FRONTEND_URL}/pages/reset-password.html?token=${token}`);
-    res.redirect(`${FRONTEND_URL}/reset-password.html?token=${token}`);
+    try {
+        const token = req.query.token; // Get token from query parameters
+        const FRONTEND_URL = "https://rajchaudar.github.io/HR-Dep"; // ✅ Ensure this is correct
+
+        if (!token) {
+            return res.status(400).json({ success: false, message: "Token is missing." });
+        }
+
+        res.redirect(`${FRONTEND_URL}/pages/reset-password.html?token=${token}`);
+    } catch (error) {
+        console.error("❌ Error in reset-password route:", error);
+        res.status(500).json({ success: false, message: "Server error." });
+    }
 });
 
 
