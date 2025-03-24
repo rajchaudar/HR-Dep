@@ -1,172 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .container {
-            display: flex;
-            width: 800px;
-            height: 500px;
-            position: relative;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            overflow: hidden;
-            align-items: stretch; /* Ensure both sections take equal height */
-        }
-
-        .image-section, .form-container {
-            flex: 1; /* Make both sections take equal width */
-            height: 100%;
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .image-section {
-            background: url('../public/image.png') no-repeat center center/cover;
-            border-radius: 10px 0 0 10px;
-            height: 100%; /* Change this to a specific height if needed */
-            width: 100%; /* Ensures it takes full width */
-        }
-
-        .form-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            border-radius: 0 10px 10px 0;
-            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            height: 100%; /* Match height with image */
-        }
-
-        .form {
-            width: 100%;
-            max-width: 350px;
-            padding: 40px;
-            box-sizing: border-box;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        input, button {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        input {
-            border: 1px solid #ccc;
-            transition: border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-
-        input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
-            outline: none;
-        }
-
-        button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s ease-in-out;
-        }
-
-        button:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-        }
-
-        .container.active .image-section {
-            transform: translateX(100%);
-        }
-
-        .container.active .form-container {
-            transform: translateX(-100%);
-        }
-
-        .container.active .form {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .form.hidden {
-            display: none;
-            opacity: 0;
-        }
-    </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Registration</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style1.css" />
+  </head>
+  <body>
     <div class="container">
-        <div class="image-section"></div>
-        <div class="form-container">
-            <div id="loginFormWrapper" class="form active">
-                <p id="loginMessage" style="display: none; font-weight: bold;"></p>
-                <h2>Login</h2>
-                <form id="loginForm">
-                    <input type="email" id="loginEmail" placeholder="Email" required>
-                    <input type="password" id="loginPassword" placeholder="Password" required>
-                    <button type="submit">Login</button>
-                </form>
-                <p>Forgot Password? <a href="set-password.html">Set Password</a></p> <!-- 🔹 Add this here -->
-                <p>Don't have an account? <a href="#" onclick="toggleForms()">Register</a></p>
-                <div class="or">or</div>
-                <div id="g_id_onload"
-                     data-client_id="272402842129-j6npr1tvm50n0i2h0o41su9i3089dh1h.apps.googleusercontent.com"
-                     data-callback="handleGoogleLogin"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" data-type="standard"></div>
-            </div>
-            <div id="registerFormWrapper" class="form hidden">
-                <h2>Register</h2>
-                <form id="registerForm">
-                    <input type="text" id="name" placeholder="Full Name" required>
-                    <input type="email" id="email" placeholder="Email" required>
-                    <input type="password" id="password" placeholder="Password" required>
-                    <button type="submit">Register</button>
-                </form>
-                <p>Already have an account? <a href="#" onclick="toggleForms()">Login</a></p>
-            </div>
+      <!-- Login Form -->
+      <div class="form-box login">
+        <form id="loginForm">
+          <h1>Login</h1>
+          <div class="input-box">
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <i class="bx bxs-envelope"></i>
+          </div>
+          <div class="input-box">
+            <input type="password" id="loginPassword" placeholder="Password" required />
+            <i class="bx bxs-lock-alt"></i>
+          </div>
+          <div class="forgot-link">
+            <a href="#" onclick="toggleResetForm()">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn">Login</button>
+          <p>Or</p>
+          <div id="googleLoginButton" class="g_id_signin"></div>
+        </form>
+      </div>
+
+      <!-- Password Reset Form (Initially Hidden) -->
+      <div class="form-box reset-password" id="resetPasswordWrapper" style="display: none;">
+        <form id="resetPasswordForm">
+          <h1>Reset Password</h1>
+          <p>Enter your email to receive a reset link.</p>
+          <div class="input-box">
+            <input type="email" id="resetEmail" placeholder="Enter your email" required />
+            <i class="bx bxs-envelope"></i>
+          </div>
+          <button type="submit" class="btn">Send Reset Link</button>
+          <p><a href="#" onclick="toggleResetForm()">Back to Login</a></p>
+          <p id="resetMessage" class="message"></p>
+        </form>
+      </div>
+
+      <!-- Registration Form -->
+      <div class="form-box register">
+        <form id="registerForm">
+          <h1>Registration</h1>
+          <div class="input-box">
+            <input type="text" id="name" placeholder="Full Name" required />
+            <i class="bx bxs-user"></i>
+          </div>
+          <div class="input-box">
+            <input type="email" id="email" placeholder="Email" required />
+            <i class="bx bxs-envelope"></i>
+          </div>
+          <div class="input-box">
+            <input type="password" id="password" placeholder="Password" required />
+            <i class="bx bxs-lock-alt"></i>
+          </div>
+          <button type="submit" class="btn">Register</button>
+          <p>Or register with Google</p>
+          <div id="googleRegisterButton" class="g_id_signin"></div>
+        </form>
+      </div>
+
+      <!-- Toggle Section -->
+      <div class="toggle-box">
+        <div class="toggle-panel toggle-left">
+          <h1>Hello, Welcome!</h1>
+          <p>Don't have an account?</p>
+          <button class="btn register-btn">Register</button>
         </div>
+        <div class="toggle-panel toggle-right">
+          <h1>Welcome Back!</h1>
+          <p>Already have an account?</p>
+          <button class="btn login-btn">Login</button>
+        </div>
+      </div>
     </div>
 
-    <script src="../js/auth.js"></script>
-    <script>
-        function toggleForms() {
-            document.querySelector('.container').classList.toggle('active');
-
-            setTimeout(() => {
-                const loginForm = document.getElementById('loginFormWrapper');
-                const registerForm = document.getElementById('registerFormWrapper');
-
-                if (loginForm.classList.contains('hidden')) {
-                    loginForm.classList.remove('hidden');
-                    registerForm.classList.add('hidden');
-                } else {
-                    registerForm.classList.remove('hidden');
-                    loginForm.classList.add('hidden');
-                }
-            }, 300); // Delay form switch for smooth effect
-        }
-    </script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-</body>
+    <script src="../js/script.js"></script>
+  </body>
 </html>

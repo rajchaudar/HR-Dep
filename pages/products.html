@@ -11,23 +11,17 @@
         }
         
         header {
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 60;
-            height: 50px; /* Increased height for better alignment */
-            display: flex;
-            align-items: center; /* Centers content vertically */
+            height: 60px;
         }
         
         body {
-            background-color: #f3f4f6;
-            padding-top: 80px; /* Adjust based on header height */
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+            padding-top: 60px; /* Adjust to match header height */
+            margin: 0;
         }
         
         section {
-            padding: 60px 20px; /* Adjust padding to prevent content overlap */
+            padding: 20px 0; /* Reduce default padding */
+            margin: 0;
         }
 
         .logout-link {
@@ -39,18 +33,25 @@
         .logout-link:hover {
             color: gray;
         }
+
+        #home {
+            min-height: calc(100vh - 80px);
+        }
+        .swiper, .swiper-slide {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
-
     <header class="bg-blue-600 text-white py-4 shadow-md fixed w-full top-0 z-50">
         <div class="container mx-auto flex justify-between items-center px-6">
             <a  href="dashboard.html" class="text-xl font-bold">MedSupply</a>
             <nav>
                 <ul class="flex space-x-6 text-lg">
                     <li><a href="dashboard.html" class="hover:text-gray-300">Home</a></li>
-                    <li><a href="products.html" class="hover:text-gray-300">Products</a></li>
-                    <li><a href="#store" class="hover:text-gray-300">Store</a></li>
+                    <li><a href="#" class="hover:text-gray-300">Products</a></li>
+                    <li><a href="store.html" class="hover:text-gray-300">Store</a></li>
                     <li><a href="dashboard.html#contact" class="hover:text-gray-300">Contact</a></li>
                 </ul>
             </nav>

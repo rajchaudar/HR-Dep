@@ -136,48 +136,59 @@ function closeModal() {
     document.getElementById("productModal").classList.add("hidden");
 }
 
-// ✅ Fetch Store Products (Products available for purchase)
-async function fetchStoreProducts() {
-    const productsContainer = document.getElementById("storeProducts");
-    if (!productsContainer) {
-        console.error("storeProducts container is missing in the HTML.");
-        return;
-    }
+// // ✅ Fetch Store Products (Products available for purchase)
+// async function fetchStoreProducts() {
+//     const productsContainer = document.getElementById("storeProducts");
+//     if (!productsContainer) {
+//         console.error("storeProducts container is missing in the HTML.");
+//         return;
+//     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/products/store`);
-        const data = await response.json();
+//     try {
+//         const response = await fetch(`${API_BASE_URL}/products/store`);
+//         if (!response.ok) throw new Error("Failed to fetch store products");
+        
+//         const data = await response.json();
+//         productsContainer.innerHTML = "";
 
-        productsContainer.innerHTML = ""; // Clear previous content
+//         if (!data.success || !data.products.length) {
+//             productsContainer.innerHTML = "<p class='text-gray-600'>No store products available.</p>";
+//             return;
+//         }
 
-        if (data.success && data.products.length > 0) {
-            data.products.forEach(product => {
-                const productItem = `
-                    <div class="product bg-white shadow-md p-4 rounded">
-                        <h3 class="text-lg font-bold">${product.name}</h3>
-                        <p>${product.description}</p>
-                        <p class="text-gray-700 font-semibold">Price: ₹${product.price}</p>
-                        <button class="bg-blue-500 text-white px-4 py-2 rounded mt-2" 
-                            onclick="addToCart('${product.name}', ${product.price})">
-                            Add to Cart
-                        </button>
-                    </div>
-                `;
-                productsContainer.innerHTML += productItem;
-            });
-        } else {
-            productsContainer.innerHTML = "<p class='text-gray-600'>No store products available.</p>";
-        }
-    } catch (error) {
-        console.error("Error fetching store products:", error);
-        productsContainer.innerHTML = "<p class='text-red-500'>Failed to load store products.</p>";
-    }
-}
+//         data.products.forEach(product => {
+//             const productItem = `
+//                 <div class="product bg-white shadow-md p-4 rounded">
+//                     <h3 class="text-lg font-bold">${product.name}</h3>
+//                     <p>${product.description || "No description available."}</p>
+//                     <p class="text-gray-700 font-semibold">Price: ₹${product.price}</p>
+//                     <button class="bg-blue-500 text-white px-4 py-2 rounded mt-2" 
+//                         onclick="addToCart('${product.name}', ${product.price})">
+//                         Add to Cart
+//                     </button>
+//                 </div>
+//             `;
+//             productsContainer.innerHTML += productItem;
+//         });
+//     } catch (error) {
+//         console.error("Error fetching store products:", error);
+//         productsContainer.innerHTML = "<p class='text-red-500'>Failed to load store products.</p>";
+//     }
+// }
 
 // Function to add a product to the cart
 function addToCart(productName, price) {
     alert(`Added ${productName} to cart for ₹${price}`);
 }
+
+// Function to update cart count
+function updateCartCount() {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    document.getElementById("cartCount").textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+}
+
+// Call function whenever cart updates
+document.addEventListener("DOMContentLoaded", updateCartCount);
 
 // Logout function
 function logout() {
@@ -195,11 +206,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.getElementById("contactForm").addEventListener("submit", async function (e) {
     e.preventDefault();
+    
+    const submitButton = e.target.querySelector("button");
+    submitButton.disabled = true;
+    submitButton.textContent = "Sending...";
 
     const formData = {
-        name: document.getElementById("name").value,
-        email: document.getElementById("email").value,
-        message: document.getElementById("message").value
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        message: document.getElementById("message").value.trim()
     };
 
     try {
@@ -212,9 +227,15 @@ document.getElementById("contactForm").addEventListener("submit", async function
         const result = await response.json();
         if (result.success) {
             document.getElementById("successMessage").classList.remove("hidden");
-            document.getElementById("contactForm").reset();
+            e.target.reset();
+        } else {
+            alert("Failed to send message. Please try again.");
         }
     } catch (error) {
         console.error("Error submitting form:", error);
+        alert("An error occurred. Please try again later.");
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Send Message";
     }
 });
