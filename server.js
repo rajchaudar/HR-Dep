@@ -4,8 +4,11 @@ const cors = require('cors');
 require('dotenv').config({path :"config.env"});
 const authRoutes = require('./routes/authRoutes');
 const productsRoutes = require('./routes/productsRoutes');
+const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const Contact = require("./models/Contact");
 const path = require('path');
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -17,13 +20,13 @@ console.log(`🔗 Running on: ${BASE_URL}`);
 app.get('/reset-password', (req, res) => {
     try {
         const token = req.query.token; // Get token from query parameters
-        const FRONTEND_URL = "https://rajchaudar.github.io/HR-Dep"; // ✅ Ensure this is correct
+        const FRONTEND_URL = process.env.FRONTEND_URL; // ✅ Ensure this is correct
 
         if (!token) {
             return res.status(400).json({ success: false, message: "Token is missing." });
         }
 
-        res.redirect(`${FRONTEND_URL}/pages/reset-password.html?token=${token}`);
+        res.redirect(`${FRONTEND_URL}/reset-password.html?token=${token}`);
     } catch (error) {
         console.error("❌ Error in reset-password route:", error);
         res.status(500).json({ success: false, message: "Server error." });
@@ -35,6 +38,11 @@ app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages/login.html'));
     res.sendFile(path.join(__dirname, 'HR-Dep/pages/login.html'));
 });
+
+// ✅ Use raw body only for Stripe webhooks
+app.use("/api/cart/stripe-webhook", express.raw({ type: "application/json" }));
+app.use(bodyParser.json());
+
 
 // Middleware
 app.use(express.json());
@@ -48,6 +56,9 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use('/api', authRoutes);
 app.use("/api/products", productsRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {

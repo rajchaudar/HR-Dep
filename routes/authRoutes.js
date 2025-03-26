@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
+const authenticateToken = require("../Middleware/authMiddleware");
 const session = require("express-session");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/User");
@@ -113,7 +114,7 @@ router.post("/auth/google/token", async (req, res) => {
         // ✅ Generate JWT Token
         const jwtToken = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
 
-        res.json({ success: true, message: "Google login successfull", token: jwtToken });
+        res.json({ success: true, message: "Google login successfull...", token: jwtToken });
     } catch (error) {
         res.status(500).json({ success: false, message: "Google authentication failed" });
     }
@@ -142,7 +143,7 @@ router.post("/register", async (req, res) => {
         const newUser = new User({ name, email, password: hashedPassword });
         await newUser.save();
 
-        res.status(201).json({ success: true, message: "User registered successfully" });
+        res.status(201).json({ success: true, message: "User registered successfully..." });
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
@@ -175,29 +176,29 @@ router.post("/login", async (req, res) => {
         // ✅ Generate JWT Token
         const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
 
-        res.status(200).json({ success: true, message: "Login successfull", token });
+        res.status(200).json({ success: true, message: "Login successfull...", token });
 
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
 
-// 📌 **Middleware to Verify JWT**
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader) return res.status(403).json({ success: false, message: "No token provided" });
+// // 📌 **Middleware to Verify JWT**
+// function authenticateToken(req, res, next) {
+//     const authHeader = req.headers["authorization"];
+//     if (!authHeader) return res.status(403).json({ success: false, message: "No token provided" });
 
-    const token = authHeader.split(" ")[1];
+//     const token = authHeader.split(" ")[1];
 
-    jwt.verify(token, SECRET_KEY, async (err, decoded) => {
-        if (err) return res.status(403).json({ success: false, message: "Invalid token" });
+//     jwt.verify(token, SECRET_KEY, async (err, decoded) => {
+//         if (err) return res.status(403).json({ success: false, message: "Invalid token" });
 
-        req.user = await User.findById(decoded.userId).select("-password");
-        if (!req.user) return res.status(404).json({ success: false, message: "User not found" });
+//         req.user = await User.findById(decoded.userId).select("-password");
+//         if (!req.user) return res.status(404).json({ success: false, message: "User not found" });
 
-        next();
-    });
-}
+//         next();
+//     });
+// }
 
 router.post('/reset-password', async (req, res) => {
     try {
@@ -221,7 +222,7 @@ router.post('/reset-password', async (req, res) => {
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
-        res.json({ success: true, message: "Password reset successful" });
+        res.json({ success: true, message: "Password reset successfull..." });
     } catch (error) {
         console.error("❌ Error resetting password:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
@@ -258,7 +259,7 @@ router.get("/user", async (req, res) => {
 
 // 📌 **Logout Route**
 router.post("/logout", (req, res) => {
-    res.json({ success: true, message: "Logout successful" });
+    res.json({ success: true, message: "Logout successfull..." });
 });
 
 module.exports = router;
