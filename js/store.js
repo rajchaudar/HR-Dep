@@ -1,97 +1,21 @@
 const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? "http://localhost:3000/api"
     : "https://hr-dep-1.onrender.com/api";
+    
 
-// ✅ Fetch Store Products
-async function fetchStoreProducts() {
-    const productsContainer = document.getElementById("storeProducts");
-    if (!productsContainer) return console.error("storeProducts container missing.");
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/products/store`);
-        const data = await response.json();
-
-        productsContainer.innerHTML = ""; // Clear previous content
-
-        if (data.success && data.products.length > 0) {
-            data.products.forEach(product => {
-                const productItem = `
-                    <div class="bg-white shadow-md p-4 rounded-lg">
-                        <img src="${product.image}" class="w-full h-40 object-cover rounded-md mb-3" alt="${product.name}">
-                        <h3 class="text-lg font-bold">${product.name}</h3>
-                        <p class="text-gray-700">${product.description}</p>
-                        <p class="font-semibold text-blue-600 mt-2">Price: ₹${product.price}</p>
-                        <button class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" 
-                            onclick="addToCart('${product.name}', ${product.price})">
-                            Add to Cart
-                        </button>
-                    </div>
-                `;
-                productsContainer.innerHTML += productItem;
-            });
-        } else {
-            productsContainer.innerHTML = "<p class='text-gray-600 text-center'>No products available in the store.</p>";
-        }
-    } catch (error) {
-        console.error("Error fetching store products:", error);
-        productsContainer.innerHTML = "<p class='text-red-500 text-center'>Failed to load store products.</p>";
-    }
-}
-
-function addToCart(productName, price) {
-    // Get cart from localStorage or initialize a new array
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    // Check if the product is already in the cart
-    const existingProduct = cart.find(item => item.name === productName);
-    if (existingProduct) {
-        existingProduct.quantity += 1; // Increase quantity if it exists
-    } else {
-        cart.push({ name: productName, price: price, quantity: 1 }); // Add new product
-    }
-
-    // Save updated cart to localStorage
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    // Update cart count in UI
-    updateCartCount();
-
-    // Show toast notification
-    showToast(`🛒 ${productName} added to cart!`);
-}
-
-// Function to update cart count
-function updateCartCount() {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    document.getElementById("cartCount").textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-}
-
-// Function to show toast notification just below the navbar
-function showToast(message) {
-    const toast = document.createElement("div");
-    toast.textContent = message;
-    toast.className = "fixed top-[70px] left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-md transition-opacity duration-500 opacity-100 z-50";
-
-    document.body.appendChild(toast);
-
-    // Automatically fade out after 2 seconds
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => toast.remove(), 500); // Remove after fade-out
-    }, 2000);
-}
-
-// Run this function on page load to sync cart count
-document.addEventListener("DOMContentLoaded", updateCartCount);
-
-// ✅ Fetch User Details (Authentication)
+    // Function to fetch user details and update the UI
 async function fetchUserDetails() {
     const token = localStorage.getItem("token");
+    
+    // Ensure elements exist before manipulating them
     const loginRegisterLink = document.getElementById("loginRegisterLink");
     const logoutLink = document.getElementById("logoutLink");
     const userName = document.getElementById("userName");
 
-    if (!loginRegisterLink || !logoutLink || !userName) return;
+    if (!loginRegisterLink || !logoutLink || !userName) {
+        console.error("One or more authentication elements are missing in the HTML.");
+        return;
+    }
 
     if (!token) {
         loginRegisterLink.classList.remove("hidden");
@@ -105,7 +29,9 @@ async function fetchUserDetails() {
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!response.ok) throw new Error("Invalid response");
+        if (!response.ok) {
+            throw new Error("Invalid response");
+        }
 
         const data = await response.json();
         if (data.success) {
@@ -123,10 +49,140 @@ async function fetchUserDetails() {
     }
 }
 
-// ✅ Logout Function
+// Logout function
 function logout() {
     localStorage.removeItem("token");
     window.location.href = "login.html";
+}
+
+// ✅ Fetch Store Products from Backend
+async function fetchStoreProducts() {
+    const productsContainer = document.getElementById("storeProducts");
+    if (!productsContainer) return console.error("❌ storeProducts container not found.");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/products/store`);
+        const data = await response.json();
+
+        productsContainer.innerHTML = ""; // Clear previous content
+
+        if (data.success && data.products.length > 0) {
+            data.products.forEach(product => {
+                const productItem = `
+                    <div class="bg-white shadow-md p-4 rounded-lg">
+                        <img src="${product.image}" class="w-full h-40 object-cover rounded-md mb-3" alt="${product.name}">
+                        <h3 class="text-lg font-bold">${product.name}</h3>
+                        <p class="text-gray-700">${product.description}</p>
+                        <p class="font-semibold text-blue-600 mt-2">Price: ₹${product.price}</p>
+                       <button class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" 
+    onclick="addToCart('${product._id}')">
+    Add to Cart
+</button>
+                    </div>
+                `;
+                productsContainer.innerHTML += productItem;
+            });
+        } else {
+            productsContainer.innerHTML = "<p class='text-gray-600 text-center'>No products available.</p>";
+        }
+    } catch (error) {
+        console.error("❌ Error fetching store products:", error);
+        productsContainer.innerHTML = "<p class='text-red-500 text-center'>Failed to load products.</p>";
+    }
+}
+
+// ✅ Add Product to Cart
+async function addToCart(productId) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        // Show the first toast message and store the toast element
+        const toast1 = showToast("⚠️ Please log in to add items!", "bg-red-600");
+    
+        // After a certain delay, show the second toast and clear the first one
+        setTimeout(() => {
+            toast1.remove(); // Remove the first toast
+            showToast("Redirecting to login..", "bg-green-600"); // Show second toast
+    
+            // Redirect after 1 second
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 700); 
+        }, 2000); // Delay the second toast by 2 seconds
+    
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ productId, quantity: 1 })
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to add item to cart.");
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            showToast("🛒 Item added to cart!", "bg-green-600");
+            updateCartCount(); // Update cart count
+        } else {
+            throw new Error(data.message || "Failed to add item.");
+        }
+    } catch (error) {
+        console.error("❌ Error adding to cart:", error);
+        showToast("❌ Failed to add item!", "bg-red-600");
+    }
+}
+
+
+// ✅ Fetch and Update Cart Count in Navbar
+async function updateCartCount() {
+    const token = localStorage.getItem("token");
+
+    // If no token, show a login prompt and redirect to login page
+    if (!token) {
+        // showToast("⚠️ Please log in to view your cart!", "bg-red-600");
+        // window.location.href = "login.html"; // Redirect to login page
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart/count`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API call failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Update the cart count in the navbar
+        const cartCountElement = document.getElementById("cart-count");
+        if (cartCountElement) {
+            cartCountElement.innerText = data.count || 0;
+        } else {
+            console.error("❌ Cart count element not found in DOM!");
+        }
+    } catch (error) {
+        console.error("❌ Error fetching cart count:", error);
+    }
+}
+
+function showToast(message, bgColor = "bg-green-600") {
+    const toast = document.createElement("div");
+    toast.className = `fixed top-[70px] left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded shadow-md transition-opacity duration-500 opacity-100 z-50`;
+    toast.innerText = message;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+    return toast;
 }
 
 // ✅ Run on Page Load

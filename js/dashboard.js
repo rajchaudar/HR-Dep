@@ -176,19 +176,19 @@ function closeModal() {
 //     }
 // }
 
-// Function to add a product to the cart
-function addToCart(productName, price) {
-    alert(`Added ${productName} to cart for ₹${price}`);
-}
+// // Function to add a product to the cart
+// function addToCart(productName, price) {
+//     alert(`Added ${productName} to cart for ₹${price}`);
+// }
 
-// Function to update cart count
-function updateCartCount() {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    document.getElementById("cartCount").textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-}
+// // Function to update cart count
+// function updateCartCount() {
+//     let cart = JSON.parse(localStorage.getItem("cart")) || [];
+//     document.getElementById("cartCount").textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+// }
 
 // Call function whenever cart updates
-document.addEventListener("DOMContentLoaded", updateCartCount);
+// document.addEventListener("DOMContentLoaded", updateCartCount);
 
 // Logout function
 function logout() {
@@ -200,7 +200,7 @@ function logout() {
 document.addEventListener("DOMContentLoaded", function () {
     fetchUserDetails();
     fetchMarketedProducts();
-    fetchStoreProducts();
+    // fetchStoreProducts();
     
 });
 
