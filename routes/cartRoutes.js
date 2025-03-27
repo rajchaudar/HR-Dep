@@ -141,39 +141,50 @@ router.get("/count", verifyToken, async (req, res) => {
 });
 
 // ✅ Checkout Route - Collect User Details & Process Payment
-router.post("/checkout", authMiddleware, async (req, res) => {
-    try {
+router.post("/checkout", verifyToken, async (req, res) => {
+    
         const { name, email, contact, address } = req.body;
-        const userId = req.user.userId;
+        
+        const userId=req.user?.userId
+        console.log("📥 Checkout Request Data:", name, email, contact, address);
 
-        console.log("🛑 Token Verified - User ID:", userId);
-
-        // ✅ Validate Address
-        if (!name || !email || !contact || !address.line1 || !address.city || !address.state || !address.postal_code) {
-            return res.status(400).json({ error: "All address details are required." });
+        // ✅ Ensure userId is available
+        if (!userId) {
+            console.error("❌ Error: userId is missing in request body");
+            return res.status(400).json({ error: "User ID is required." });
         }
 
-        // ✅ Fetch User's Cart
-        let cart = await Cart.findOne({ userId }).populate("items.productId");
-        console.log("🛒 Cart Data:", cart);
-
-        if (!cart || cart.items.length === 0) {
-            console.log("❌ No items in cart.");
-            return res.status(400).json({ error: "Cart is empty" });
+        // ✅ Ensure all required fields exist
+        if (!name || !email || !contact || !address || !address.line1 || !address.city || !address.state || !address.postal_code) {
+            return res.status(400).json({ error: "All user details and address are required." });
         }
 
-        // ✅ Calculate Total Amount
-        let totalAmount = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        console.log("🛒 Total Amount:", totalAmount);
+        // ✅ Fetch the user's cart
+        const userCart = await Cart.findOne({ userId }).populate("items.productId"); // 🔴 Fixed
 
-        // ✅ Create Stripe Payment Intent
-        console.log("✅ Creating Payment Intent...");
+        if (!userCart || userCart.items.length === 0) {
+            return res.status(400).json({ error: "Cart is empty. Add items before checkout." });
+        }
+
+       // ✅ Calculate total amount dynamically
+let totalAmount = userCart.items.reduce((sum, item) => {
+    if (item.productId && item.productId.price) {
+        return sum + item.productId.price * item.quantity;
+    }
+    return sum;
+}, 0);
+        
+totalAmount = Math.round(totalAmount * 100); // Convert to cents for Stripe
+
+        console.log("💰 Total Amount:", totalAmount);
+
+        // ✅ Create Stripe PaymentIntent
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(totalAmount * 100), // Convert to cents
+            amount: totalAmount,
             currency: "usd",
             payment_method_types: ["card"],
-            description: `Order for ${cart.items.length} items`,
-            metadata: { userId, orderId: new Date().getTime().toString() },
+            receipt_email: email,
+            description: `Purchase from MedSupply - Order by ${name}`,
             shipping: {
                 name: name,
                 address: {
@@ -181,54 +192,59 @@ router.post("/checkout", authMiddleware, async (req, res) => {
                     city: address.city,
                     state: address.state,
                     postal_code: address.postal_code,
-                    country: "US",
-                }
+                    country: "IN",
+                },
             },
-            receipt_email: email,
         });
 
-        console.log("✅ Payment Intent Created:", paymentIntent.id);
-
-        // ✅ Save Order in Database
-        const newOrder = new Order({
-            userId,
-            name,
-            email,
-            contact,
-            address,
-            items: cart.items.map(item => ({
-                productId: item.productId._id,
-                name: item.productId.name,
-                price: item.productId.price,
-                quantity: item.quantity
-            })),
-            totalAmount,
-            paymentIntentId: paymentIntent.id,
-            status: "Pending",
-            createdAt: new Date(),
+        const newOrder = await Order.create({
+            userId: userId,
+            name: name,
+            contact: contact,
+            email: email,
+            address: address,
+            items: userCart.items, // ✅ Use userCart.items, not entire userCart
+            paymentIntentId: paymentIntent.id, // ✅ Use paymentIntent.id, not entire object
+            totalAmount: totalAmount / 100, // ✅ Convert cents to dollars if needed
         });
-
-        await newOrder.save();
-        console.log("✅ Order Saved in Database:", newOrder._id);
-
-        // ✅ Clear Cart After Checkout
-        await Cart.findOneAndDelete({ userId });
-        console.log("🛒 Cart Cleared for User:", userId);
-
-        // ✅ Send Response to Frontend
-        res.json({
-            success: true,
-            message: "Order placed successfully!",
-            order: newOrder,
-            clientSecret: paymentIntent.client_secret
-        });
-
-    } catch (err) {
-        console.error("❌ Checkout Error:", err);
-        res.status(500).json({ error: "Server error", details: err.message });
-    }
+        
+        // ❌ REMOVE `await Order.save()`
+        console.log("✅ Order Placed Successfully:", newOrder);
+        res.json({ clientSecret: paymentIntent.client_secret, orderId: newOrder._id });
+        
+        
 });
 
+// ✅ Update Order Status Route
+router.put("/orderstatus/:orderId", verifyToken, async (req, res) => {
+    try {
+        const { status } = req.body;
+        const { orderId } = req.params;
+
+        // ✅ Validate input
+        if (!status) {
+            return res.status(400).json({ error: "Order status is required" });
+        }
+
+        // ✅ Find and update the order
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { status },
+            { new: true } // ✅ Return the updated document
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        console.log(`✅ Order ${orderId} status updated to: ${status}`);
+        res.json({ success: true, message: "Order status updated", order: updatedOrder });
+
+    } catch (error) {
+        console.error("❌ Order Status Update Error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
 
 // ✅ Fetch User Orders
 router.get("/orders", authMiddleware, async (req, res) => {
