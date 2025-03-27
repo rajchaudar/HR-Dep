@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success</title>
+</head>
+<body>
+    <h2>🎉 Payment Successful! 🎉</h2>
+    <p>Your order has been placed successfully.</p>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get("session_id");
+        
+        if (sessionId) {
+            fetch(`http://localhost:3000/api/cart/confirm-payment?session_id=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("message").innerHTML = "🎉 Payment Successful!";
+                    } else {
+                        document.getElementById("message").innerHTML = "❌ Payment Failed!";
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
