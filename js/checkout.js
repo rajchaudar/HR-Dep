@@ -168,7 +168,10 @@ async function processPayment() {
 
         return;
     } else {
-        alert("✅ Payment Successful!");
+        // ✅ Show success message before order update
+        const successMessage = document.getElementById("success-message");
+        successMessage.innerHTML = "✅ Payment Successful! Redirecting...";
+        successMessage.classList.remove("hidden");  
 
         // ✅ Update Order Status to "Paid"
         await fetch(`${API_BASE_URL}/cart/orderstatus/${orderId}`, { 
@@ -181,8 +184,9 @@ async function processPayment() {
         });
 
         await clearCart()
-
+        setTimeout(() =>{
         // ✅ Redirect to Success Page
         window.location.href = "order-success.html";
+        },3000);
     }
 }

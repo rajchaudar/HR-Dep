@@ -54,11 +54,54 @@ function logout() {
     window.location.href = "login.html";
 }
 
+async function updateCartCount() {
+    const token = localStorage.getItem("token");
+
+    // If no token, show a login prompt and redirect to login page
+    if (!token) {
+        // showToast("⚠️ Please log in to view your cart!", "bg-red-600");
+        // window.location.href = "login.html"; // Redirect to login page
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart/count`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API call failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Update the cart count in the navbar
+        const cartCountElement = document.getElementById("cart-count");
+        if (cartCountElement) {
+            cartCountElement.innerText = data.count || 0;
+        } else {
+            console.error("❌ Cart count element not found in DOM!");
+        }
+    } catch (error) {
+        console.error("❌ Error fetching cart count:", error);
+    }
+}
+
 // ✅ Fetch and Display Cart Items
 async function fetchCartItems() {
     const token = localStorage.getItem("token");
     if (!token) {
-        document.getElementById("cartItems").innerHTML = "<p>Please <a href='login.html'>log in</a> to view your cart.</p>";
+        document.getElementById("cartItems").innerHTML = `<div class="flex justify-center items-center min-h-[200px]">
+    <div class="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-lg shadow-md">
+        <p class="text-gray-700 text-lg font-semibold mb-2">Your cart is currently empty!</p>
+        <p class="text-gray-600 mb-4">Log in to view and manage your items.</p>
+        <a href='login.html' class="px-5 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+            Log in to Continue
+        </a>
+    </div>
+</div>
+        `;
         return;
     }
 
@@ -71,7 +114,7 @@ async function fetchCartItems() {
         if (!response.ok) throw new Error("Failed to fetch cart");
 
         const data = await response.json();
-        console.log("🔹 Cart Data:", data);
+        // console.log("🔹 Cart Data:", data);
 
         if (!data.items || data.items.length === 0) {
             document.getElementById("cartItems").innerHTML = "<p>Your cart is empty.</p>";
@@ -103,7 +146,7 @@ async function fetchCartItems() {
         document.getElementById("cartTotal").innerText = total.toFixed(2);
     } catch (error) {
         console.error("❌ Error fetching cart:", error);
-        document.getElementById("cartItems").innerHTML = "<p>Failed to load cart items.</p>";
+        document.getElementById("cartItems").innerHTML = "<p>Failed to load cart items.(Check If You Logged Out)</p>";
     }
 }
 
@@ -153,7 +196,7 @@ async function removeFromCart(productId) {
 function checkout() {
     const token = localStorage.getItem("token");
     if (!token) {
-        alert("Please log in to proceed with checkout.");
+        alert("Please log in to proceed with checkout.");///////
         window.location.href = "login.html";
         return;
     }
@@ -180,5 +223,8 @@ function checkout() {
 // ✅ Run on Page Load
 document.addEventListener("DOMContentLoaded", function () {
     fetchUserDetails();
+
     fetchCartItems();
+
+    updateCartCount()
 });
