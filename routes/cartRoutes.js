@@ -55,7 +55,7 @@ router.post("/add", verifyToken, async (req, res) => {
 
         let cart = await Cart.findOne({ userId: req.user.userId });
         if (!cart) {
-            console.log("🔹 No existing cart. Creating new cart.");
+            // console.log("🔹 No existing cart. Creating new cart.");
             cart = new Cart({ userId: req.user.userId, items: [] });
         }
 
@@ -145,8 +145,8 @@ router.post("/checkout", verifyToken, async (req, res) => {
     
         const { name, email, contact, address } = req.body;
         
-        const userId=req.user?.userId
-        console.log("📥 Checkout Request Data:", name, email, contact, address);
+        const userId=req.user?.userId;
+        // console.log("📥 Checkout Request Data:", name, email, contact, address);
 
         // ✅ Ensure userId is available
         if (!userId) {
@@ -176,7 +176,7 @@ let totalAmount = userCart.items.reduce((sum, item) => {
         
 totalAmount = Math.round(totalAmount * 100); // Convert to cents for Stripe
 
-        console.log("💰 Total Amount:", totalAmount);
+        // console.log("💰 Total Amount:", totalAmount);
 
         // ✅ Create Stripe PaymentIntent
         const paymentIntent = await stripe.paymentIntents.create({
@@ -209,7 +209,7 @@ totalAmount = Math.round(totalAmount * 100); // Convert to cents for Stripe
         });
         
         // ❌ REMOVE `await Order.save()`
-        console.log("✅ Order Placed Successfully:", newOrder);
+        // console.log("✅ Order Placed Successfully:", newOrder);
         res.json({ clientSecret: paymentIntent.client_secret, orderId: newOrder._id });
         
         
@@ -237,7 +237,7 @@ router.put("/orderstatus/:orderId", verifyToken, async (req, res) => {
             return res.status(404).json({ error: "Order not found" });
         }
 
-        console.log(`✅ Order ${orderId} status updated to: ${status}`);
+        // console.log(`✅ Order ${orderId} status updated to: ${status}`);
         res.json({ success: true, message: "Order status updated", order: updatedOrder });
 
     } catch (error) {

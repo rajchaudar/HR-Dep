@@ -5,7 +5,6 @@ require('dotenv').config({path :"config.env"});
 const authRoutes = require('./routes/authRoutes');
 const productsRoutes = require('./routes/productsRoutes');
 const cartRoutes = require("./routes/cartRoutes");
-const orderRoutes = require("./routes/orderRoutes");
 const Contact = require("./models/Contact");
 const path = require('path');
 const bodyParser = require("body-parser");
@@ -57,7 +56,6 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api', authRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes);
 
 
 // Serve frontend in production

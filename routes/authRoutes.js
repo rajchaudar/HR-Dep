@@ -233,7 +233,7 @@ router.post('/reset-password', async (req, res) => {
 router.get("/dashboard", async (req, res) => {
     try {
         const users = await User.find().select("-password");
-        const products = await Product.find(); // Fetch all products
+        const products = await products.find(); // Fetch all products
 
         res.json({ success: true, users, products });
     } catch (error) {
