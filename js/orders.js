@@ -138,7 +138,7 @@ async function fetchOrders() {
                         "bg-gray-500"
                     }">${order.status}</span>
                 </div>
-                <p class="text-gray-700">Total: <span class="font-medium">$${order.totalAmount.toFixed(2)}</span></p>
+                <p class="text-gray-700">Total: <span class="font-medium">₹${order.totalAmount.toFixed(2)}</span></p>
                 <p class="text-gray-700">Placed on: <span class="font-medium">${new Date(order.createdAt).toLocaleString()}</span></p>
                 
                 <!-- Ordered Items -->
